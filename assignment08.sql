@@ -29,8 +29,8 @@ create table BC_EMPLOYEES
     EMPLOYEE_ID    NUMBER default employee_id_seq.nextval not null,
     LAST_NAME      VARCHAR2(30),
     FIRST_NAME     VARCHAR2(30),
-    HOURS          FLOAT,
-    HOURLY_RATE    FLOAT,
+    HOURS          NUMBER(9,2),
+    HOURLY_RATE    NUMBER(9,2),
     TRANSPORT_CODE CHAR,
     constraint BC_EMPLOYEES_PK
         primary key (EMPLOYEE_ID),
@@ -45,12 +45,12 @@ create table BC_EMPLOYEES
 create table BC_PAYROLL
 (
     EMPLOYEE_ID   NUMBER,
-    REG_HOURS     FLOAT,
-    OVT_HOURS     FLOAT,
-    GROSS_PAY     FLOAT,
-    TAXES         FLOAT,
-    TRANSPORT_FEE FLOAT,
-    NET_PAY       FLOAT,
+    REG_HOURS     NUMBER(9,2),
+    OVT_HOURS     NUMBER(9,2),
+    GROSS_PAY     NUMBER(9,2),
+    TAXES         NUMBER(9,2),
+    TRANSPORT_FEE NUMBER(9,2),
+    NET_PAY       NUMBER(9,2),
     constraint PAYROLL_EMPLOYEES_EMP_ID_FK
         foreign key (EMPLOYEE_ID) references BC_EMPLOYEES,
     constraint PAYROLL_GROSS_PAY_CHECK
@@ -101,6 +101,8 @@ BEGIN
             regular_hours := case when employee_row.hours > 40 then 40 else employee_row.hours end;
             ot_hours := case when employee_row.hours > 40 then employee_row.hours - 40 else 0 end;
 
+            DBMS_OUTPUT.PUT_LINE('REG: ' || regular_hours );
+
             transport_fee :=
                     CASE
                         WHEN employee_row.TRANSPORT_CODE = 'P' THEN 7.5
@@ -115,7 +117,7 @@ BEGIN
             --             DBMS_OUTPUT.PUT_LINE( employee_row.EMPLOYEE_ID || ' ' || employee_row.FIRST_NAME || ' ' || 'gross: ' || gross_pay || ' net: ' || net_pay ||
 --                                  ' taxes: ' || taxes || ' transport: ' || transport_fee);
             INSERT INTO BC_PAYROLL (EMPLOYEE_ID, REG_HOURS, OVT_HOURS, GROSS_PAY, TAXES, TRANSPORT_FEE, NET_PAY)
-            VALUES (employee_row.EMPLOYEE_ID, regular_hours, ot_hours, gross_pay, taxes, transport_fee, net_pay);
+            VALUES (employee_row.EMPLOYEE_ID, regular_hours, ot_hours, ROUND(gross_pay, 2), taxes, transport_fee, net_pay);
         end loop;
 END;
 /
