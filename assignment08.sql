@@ -101,8 +101,6 @@ BEGIN
             regular_hours := case when employee_row.hours > 40 then 40 else employee_row.hours end;
             ot_hours := case when employee_row.hours > 40 then employee_row.hours - 40 else 0 end;
 
-            DBMS_OUTPUT.PUT_LINE('REG: ' || regular_hours );
-
             transport_fee :=
                     CASE
                         WHEN employee_row.TRANSPORT_CODE = 'P' THEN 7.5
