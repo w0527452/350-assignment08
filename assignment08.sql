@@ -1,15 +1,17 @@
 BEGIN
-    EXECUTE IMMEDIATE 'DROP TABLE BC_EMPLOYEES CASCADE CONSTRAINTS ';
-EXCEPTION
-    WHEN OTHERS THEN
-        NULL;
-END;
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE BC_EMPLOYEES CASCADE CONSTRAINTS ';
+    EXCEPTION
+        WHEN OTHERS THEN
+            NULL;
+    END;
 
-BEGIN
-    EXECUTE IMMEDIATE 'DROP SEQUENCE employee_id_seq';
-EXCEPTION
-    WHEN OTHERS THEN
-        NULL;
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP SEQUENCE employee_id_seq';
+    EXCEPTION
+        WHEN OTHERS THEN
+            NULL;
+    END;
 END;
 /
 
@@ -77,3 +79,4 @@ BEGIN
                                  ' taxes: ' || taxes || ' transport: ' || transport_fee);
         end loop;
 END;
+/
