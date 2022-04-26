@@ -57,13 +57,16 @@ DECLARE
 BEGIN
     FOR employee_row in employees_cursor
         LOOP
-            if employee_row.hours > 40 then
-                regular_hours := 40;
-                ot_hours := employee_row.hours - 40;
-            else
-                regular_hours := employee_row.hours;
-                ot_hours := 0;
-            end if;
+--             if employee_row.hours > 40 then
+--                 regular_hours := 40;
+--                 ot_hours := employee_row.hours - 40;
+--             else
+--                 regular_hours := employee_row.hours;
+--                 ot_hours := 0;
+--             end if;
+
+            regular_hours := case when employee_row.hours > 40 then 40 else employee_row.hours end;
+            ot_hours := case when employee_row.hours > 40 then employee_row.hours - 40 else 0 end;
 
             transport_fee :=
                     CASE
