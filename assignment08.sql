@@ -45,12 +45,12 @@ create table BC_EMPLOYEES
 create table BC_PAYROLL
 (
     EMPLOYEE_ID   NUMBER,
-    REG_HOURS     NUMBER(9,2),
-    OVT_HOURS     NUMBER(9,2),
-    GROSS_PAY     NUMBER(9,2),
-    TAXES         NUMBER(9,2),
-    TRANSPORT_FEE NUMBER(9,2),
-    NET_PAY       NUMBER(9,2),
+    REG_HOURS     NUMBER(9, 2),
+    OVT_HOURS     NUMBER(9, 2),
+    GROSS_PAY     NUMBER(9, 2),
+    TAXES         NUMBER(9, 2),
+    TRANSPORT_FEE NUMBER(9, 2),
+    NET_PAY       NUMBER(9, 2),
     constraint PAYROLL_EMPLOYEES_EMP_ID_FK
         foreign key (EMPLOYEE_ID) references BC_EMPLOYEES,
     constraint PAYROLL_GROSS_PAY_CHECK
