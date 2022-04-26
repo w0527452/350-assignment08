@@ -115,7 +115,7 @@ BEGIN
             --             DBMS_OUTPUT.PUT_LINE( employee_row.EMPLOYEE_ID || ' ' || employee_row.FIRST_NAME || ' ' || 'gross: ' || gross_pay || ' net: ' || net_pay ||
 --                                  ' taxes: ' || taxes || ' transport: ' || transport_fee);
             INSERT INTO BC_PAYROLL (EMPLOYEE_ID, REG_HOURS, OVT_HOURS, GROSS_PAY, TAXES, TRANSPORT_FEE, NET_PAY)
-            VALUES (employee_row.EMPLOYEE_ID, regular_hours, ot_hours, ROUND(gross_pay, 2), taxes, transport_fee, net_pay);
+            VALUES (employee_row.EMPLOYEE_ID, regular_hours, ot_hours, gross_pay, taxes, transport_fee, net_pay);
         end loop;
 END;
 /
