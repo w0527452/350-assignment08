@@ -1,6 +1,13 @@
 BEGIN
     BEGIN
-        EXECUTE IMMEDIATE 'DROP TABLE BC_EMPLOYEES CASCADE CONSTRAINTS ';
+        EXECUTE IMMEDIATE 'DROP TABLE BC_EMPLOYEES CASCADE CONSTRAINTS';
+    EXCEPTION
+        WHEN OTHERS THEN
+            NULL;
+    END;
+
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE BC_PAYROLL CASCADE CONSTRAINTS';
     EXCEPTION
         WHEN OTHERS THEN
             NULL;
@@ -35,12 +42,38 @@ create table BC_EMPLOYEES
         check (transport_code IN ('P', 'T', 'L', 'N'))
 );
 
+create table BC_PAYROLL
+(
+    EMPLOYEE_ID   NUMBER,
+    REG_HOURS     FLOAT,
+    OVT_HOURS     FLOAT,
+    GROSS_PAY     FLOAT,
+    TAXES         FLOAT,
+    TRANSPORT_FEE FLOAT,
+    NET_PAY       FLOAT,
+    constraint PAYROLL_EMPLOYEES_EMP_ID_FK
+        foreign key (EMPLOYEE_ID) references BC_EMPLOYEES,
+    constraint PAYROLL_GROSS_PAY_CHECK
+        check (gross_pay between 0 and 9999.99),
+    constraint PAYROLL_HOURS_CHECK
+        check (reg_hours between 0 and 99.99),
+    constraint PAYROLL_NET_PAY_CHECK
+        check (net_pay between 0 and 9999.99),
+    constraint PAYROLL_OVT_CHECK
+        check (ovt_hours between 0 and 99.99),
+    constraint PAYROLL_TAXES_CHECK
+        check (taxes between 0 and 9999.99),
+    constraint PAYROLL_TRANSPORT_CHECK
+        check (transport_fee between 0 and 99.99)
+);
+
 INSERT INTO BC_EMPLOYEES (LAST_NAME, FIRST_NAME, HOURS, HOURLY_RATE, TRANSPORT_CODE)
 VALUES ('Horsecollar', 'Horace', 38, 12.5, 'P');
 INSERT INTO BC_EMPLOYEES (LAST_NAME, FIRST_NAME, HOURS, HOURLY_RATE, TRANSPORT_CODE)
 VALUES ('Reins', 'Rachel', 46.5, 14.4, 'T');
 INSERT INTO BC_EMPLOYEES (LAST_NAME, FIRST_NAME, HOURS, HOURLY_RATE, TRANSPORT_CODE)
 VALUES ('Saddle', 'Samuel', 51, 40, 'N');
+
 
 DECLARE
     tax_rate      FLOAT := .28;
@@ -52,7 +85,7 @@ DECLARE
     taxes         BC_EMPLOYEES.hourly_rate%TYPE;
     CURSOR employees_cursor IS select *
                                from BC_EMPLOYEES
-                               order by FIRST_NAME desc;
+                               order by FIRST_NAME ASC;
     employee_row  BC_EMPLOYEES%rowtype;
 BEGIN
     FOR employee_row in employees_cursor
@@ -79,8 +112,10 @@ BEGIN
             gross_pay := regular_hours * employee_row.HOURLY_RATE + ot_hours * employee_row.HOURLY_RATE * 1.5;
             taxes := gross_pay * tax_rate;
             net_pay := gross_pay - taxes - transport_fee;
-            DBMS_OUTPUT.PUT_LINE(employee_row.FIRST_NAME || ' ' || 'gross: ' || gross_pay || ' net: ' || net_pay ||
-                                 ' taxes: ' || taxes || ' transport: ' || transport_fee);
+            --             DBMS_OUTPUT.PUT_LINE( employee_row.EMPLOYEE_ID || ' ' || employee_row.FIRST_NAME || ' ' || 'gross: ' || gross_pay || ' net: ' || net_pay ||
+--                                  ' taxes: ' || taxes || ' transport: ' || transport_fee);
+            INSERT INTO BC_PAYROLL (EMPLOYEE_ID, REG_HOURS, OVT_HOURS, GROSS_PAY, TAXES, TRANSPORT_FEE, NET_PAY)
+            VALUES (employee_row.EMPLOYEE_ID, regular_hours, ot_hours, gross_pay, taxes, transport_fee, net_pay);
         end loop;
 END;
 /
