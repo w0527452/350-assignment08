@@ -51,7 +51,8 @@ DECLARE
     transport_fee BC_EMPLOYEES.hourly_rate%TYPE;
     taxes         BC_EMPLOYEES.hourly_rate%TYPE;
     CURSOR employees_cursor IS select *
-                               from BC_EMPLOYEES;
+                               from BC_EMPLOYEES
+                               order by FIRST_NAME desc;
     employee_row  BC_EMPLOYEES%rowtype;
 BEGIN
     FOR employee_row in employees_cursor
