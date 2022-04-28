@@ -29,8 +29,8 @@ create table BC_EMPLOYEES
     EMPLOYEE_ID    NUMBER default employee_id_seq.nextval not null,
     LAST_NAME      VARCHAR2(30),
     FIRST_NAME     VARCHAR2(30),
-    HOURS          NUMBER(9,2),
-    HOURLY_RATE    NUMBER(9,2),
+    HOURS          NUMBER(9, 2),
+    HOURLY_RATE    NUMBER(9, 2),
     TRANSPORT_CODE CHAR,
     constraint BC_EMPLOYEES_PK
         primary key (EMPLOYEE_ID),
@@ -76,6 +76,7 @@ VALUES ('Saddle', 'Samuel', 51, 40, 'N');
 
 
 DECLARE
+    dynamic_sql   VARCHAR2(1000);
     tax_rate      FLOAT := .28;
     regular_hours BC_EMPLOYEES.hours%TYPE;
     ot_hours      BC_EMPLOYEES.hours%TYPE;
@@ -90,7 +91,7 @@ DECLARE
 BEGIN
     FOR employee_row in employees_cursor
         LOOP
---             if employee_row.hours > 40 then
+        --             if employee_row.hours > 40 then
 --                 regular_hours := 40;
 --                 ot_hours := employee_row.hours - 40;
 --             else
@@ -114,8 +115,11 @@ BEGIN
             net_pay := gross_pay - taxes - transport_fee;
             --             DBMS_OUTPUT.PUT_LINE( employee_row.EMPLOYEE_ID || ' ' || employee_row.FIRST_NAME || ' ' || 'gross: ' || gross_pay || ' net: ' || net_pay ||
 --                                  ' taxes: ' || taxes || ' transport: ' || transport_fee);
-            INSERT INTO BC_PAYROLL (EMPLOYEE_ID, REG_HOURS, OVT_HOURS, GROSS_PAY, TAXES, TRANSPORT_FEE, NET_PAY)
-            VALUES (employee_row.EMPLOYEE_ID, regular_hours, ot_hours, gross_pay, taxes, transport_fee, net_pay);
+
+            dynamic_sql :=
+                        'INSERT INTO BC_PAYROLL VALUES(' || employee_row.EMPLOYEE_ID || ', ' || regular_hours || ', ' ||
+                        ot_hours || ', ' || gross_pay || ', ' || taxes || ', ' || transport_fee || ', ' || net_pay || ')';
+            EXECUTE IMMEDIATE dynamic_sql;
         end loop;
 END;
 /
