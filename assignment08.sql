@@ -35,9 +35,9 @@ create table BC_EMPLOYEES
     constraint BC_EMPLOYEES_PK
         primary key (EMPLOYEE_ID),
     constraint VALID_HOURLY_RATE
-        check (hourly_rate between 0 and 99.99),
+        check (hourly_rate > 0 AND hours < 99.99),
     constraint VALID_HOURS
-        check (hours between 0 and 99.99),
+        check (hours > 0 AND hours < 99.99),
     constraint VALID_TRANSPORT
         check (transport_code IN ('P', 'T', 'L', 'N'))
 );
@@ -54,17 +54,17 @@ create table BC_PAYROLL
     constraint PAYROLL_EMPLOYEES_EMP_ID_FK
         foreign key (EMPLOYEE_ID) references BC_EMPLOYEES,
     constraint PAYROLL_GROSS_PAY_CHECK
-        check (gross_pay between 0 and 9999.99),
+        check (gross_pay >= 0 AND gross_pay <= 9999.99),
     constraint PAYROLL_HOURS_CHECK
-        check (reg_hours between 0 and 99.99),
+        check (reg_hours >= 0 AND reg_hours <= 99.99),
     constraint PAYROLL_NET_PAY_CHECK
-        check (net_pay between 0 and 9999.99),
+        check (net_pay >= 0 AND net_pay <= 9999.99),
     constraint PAYROLL_OVT_CHECK
-        check (ovt_hours between 0 and 99.99),
+        check (ovt_hours >= 0 AND ovt_hours <= 99.99),
     constraint PAYROLL_TAXES_CHECK
-        check (taxes between 0 and 9999.99),
+        check (taxes >= 0 AND taxes <= 9999.99),
     constraint PAYROLL_TRANSPORT_CHECK
-        check (transport_fee between 0 and 99.99)
+        check (transport_fee >= 0 AND transport_fee <= 99.99)
 );
 
 INSERT INTO BC_EMPLOYEES (LAST_NAME, FIRST_NAME, HOURS, HOURLY_RATE, TRANSPORT_CODE)
