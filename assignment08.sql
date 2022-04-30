@@ -38,9 +38,9 @@ create table BC_EMPLOYEES
     constraint BC_EMPLOYEES_PK
         primary key (EMPLOYEE_ID),
     constraint VALID_HOURLY_RATE
-        check (hourly_rate > 0 AND hours < 99.99),
+        check (hourly_rate >= 0 AND hours <= 99.99),
     constraint VALID_HOURS
-        check (hours > 0 AND hours < 99.99),
+        check (hours >= 0 AND hours <= 99.99),
     constraint VALID_TRANSPORT
         check (transport_code IN ('P', 'T', 'L', 'N'))
 );
