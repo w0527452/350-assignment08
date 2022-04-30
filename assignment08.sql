@@ -29,15 +29,15 @@ create table BC_EMPLOYEES
     EMPLOYEE_ID    NUMBER default employee_id_seq.nextval not null,
     LAST_NAME      VARCHAR2(30),
     FIRST_NAME     VARCHAR2(30),
-    HOURS          NUMBER(9,2),
-    HOURLY_RATE    NUMBER(9,2),
+    HOURS          NUMBER(9, 2),
+    HOURLY_RATE    NUMBER(9, 2),
     TRANSPORT_CODE CHAR,
     constraint BC_EMPLOYEES_PK
         primary key (EMPLOYEE_ID),
     constraint VALID_HOURLY_RATE
-        check (hourly_rate between 0 and 99.99),
+        check (hourly_rate > 0 AND hours < 99.99),
     constraint VALID_HOURS
-        check (hours between 0 and 99.99),
+        check (hours > 0 AND hours < 99.99),
     constraint VALID_TRANSPORT
         check (transport_code IN ('P', 'T', 'L', 'N'))
 );
@@ -54,17 +54,17 @@ create table BC_PAYROLL
     constraint PAYROLL_EMPLOYEES_EMP_ID_FK
         foreign key (EMPLOYEE_ID) references BC_EMPLOYEES,
     constraint PAYROLL_GROSS_PAY_CHECK
-        check (gross_pay between 0 and 9999.99),
+        check (gross_pay >= 0 AND gross_pay <= 9999.99),
     constraint PAYROLL_HOURS_CHECK
-        check (reg_hours between 0 and 99.99),
+        check (reg_hours >= 0 AND reg_hours <= 99.99),
     constraint PAYROLL_NET_PAY_CHECK
-        check (net_pay between 0 and 9999.99),
+        check (net_pay >= 0 AND net_pay <= 9999.99),
     constraint PAYROLL_OVT_CHECK
-        check (ovt_hours between 0 and 99.99),
+        check (ovt_hours >= 0 AND ovt_hours <= 99.99),
     constraint PAYROLL_TAXES_CHECK
-        check (taxes between 0 and 9999.99),
+        check (taxes >= 0 AND taxes <= 9999.99),
     constraint PAYROLL_TRANSPORT_CHECK
-        check (transport_fee between 0 and 99.99)
+        check (transport_fee >= 0 AND transport_fee <= 99.99)
 );
 
 INSERT INTO BC_EMPLOYEES (LAST_NAME, FIRST_NAME, HOURS, HOURLY_RATE, TRANSPORT_CODE)
@@ -76,6 +76,7 @@ VALUES ('Saddle', 'Samuel', 51, 40, 'N');
 
 
 DECLARE
+    dynamic_sql   VARCHAR2(1000);
     tax_rate      FLOAT := .28;
     regular_hours BC_EMPLOYEES.hours%TYPE;
     ot_hours      BC_EMPLOYEES.hours%TYPE;
@@ -90,7 +91,7 @@ DECLARE
 BEGIN
     FOR employee_row in employees_cursor
         LOOP
---             if employee_row.hours > 40 then
+        --             if employee_row.hours > 40 then
 --                 regular_hours := 40;
 --                 ot_hours := employee_row.hours - 40;
 --             else
@@ -114,8 +115,11 @@ BEGIN
             net_pay := gross_pay - taxes - transport_fee;
             --             DBMS_OUTPUT.PUT_LINE( employee_row.EMPLOYEE_ID || ' ' || employee_row.FIRST_NAME || ' ' || 'gross: ' || gross_pay || ' net: ' || net_pay ||
 --                                  ' taxes: ' || taxes || ' transport: ' || transport_fee);
-            INSERT INTO BC_PAYROLL (EMPLOYEE_ID, REG_HOURS, OVT_HOURS, GROSS_PAY, TAXES, TRANSPORT_FEE, NET_PAY)
-            VALUES (employee_row.EMPLOYEE_ID, regular_hours, ot_hours, gross_pay, taxes, transport_fee, net_pay);
+
+            dynamic_sql :=
+                        'INSERT INTO BC_PAYROLL VALUES(' || employee_row.EMPLOYEE_ID || ', ' || regular_hours || ', ' ||
+                        ot_hours || ', ' || gross_pay || ', ' || taxes || ', ' || transport_fee || ', ' || net_pay || ')';
+            EXECUTE IMMEDIATE dynamic_sql;
         end loop;
 END;
 /
