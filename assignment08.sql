@@ -1,3 +1,4 @@
+-- Drop tables at beginning with Exception
 BEGIN
     BEGIN
         EXECUTE IMMEDIATE 'DROP TABLE BC_EMPLOYEES CASCADE CONSTRAINTS';
@@ -22,8 +23,10 @@ BEGIN
 END;
 /
 
+-- Start sequence for employee id
 create sequence employee_id_seq start with 1;
 
+-- Creates tables of employee data 
 create table BC_EMPLOYEES
 (
     EMPLOYEE_ID    NUMBER default employee_id_seq.nextval not null,
@@ -42,6 +45,7 @@ create table BC_EMPLOYEES
         check (transport_code IN ('P', 'T', 'L', 'N'))
 );
 
+-- INSERT INTO bc_employees
 create table BC_PAYROLL
 (
     EMPLOYEE_ID   NUMBER,
@@ -67,6 +71,7 @@ create table BC_PAYROLL
         check (transport_fee between 0 and 99.99)
 );
 
+-- Insert employee data into bc_employee table
 INSERT INTO BC_EMPLOYEES (LAST_NAME, FIRST_NAME, HOURS, HOURLY_RATE, TRANSPORT_CODE)
 VALUES ('Horsecollar', 'Horace', 38, 12.5, 'P');
 INSERT INTO BC_EMPLOYEES (LAST_NAME, FIRST_NAME, HOURS, HOURLY_RATE, TRANSPORT_CODE)
@@ -75,6 +80,7 @@ INSERT INTO BC_EMPLOYEES (LAST_NAME, FIRST_NAME, HOURS, HOURLY_RATE, TRANSPORT_C
 VALUES ('Saddle', 'Samuel', 51, 40, 'N');
 
 
+-- Anonymous PL/SQL block
 DECLARE
     tax_rate      FLOAT := .28;
     regular_hours BC_EMPLOYEES.hours%TYPE;
@@ -83,10 +89,13 @@ DECLARE
     net_pay       BC_EMPLOYEES.hourly_rate%TYPE;
     transport_fee BC_EMPLOYEES.hourly_rate%TYPE;
     taxes         BC_EMPLOYEES.hourly_rate%TYPE;
+    
+ -- moves cursor through bc_employee table     
     CURSOR employees_cursor IS select *
                                from BC_EMPLOYEES
                                order by FIRST_NAME ASC;
     employee_row  BC_EMPLOYEES%rowtype;
+
 BEGIN
     FOR employee_row in employees_cursor
         LOOP
@@ -98,9 +107,11 @@ BEGIN
 --                 ot_hours := 0;
 --             end if;
 
+-- split hours into regular and overtime 
             regular_hours := case when employee_row.hours > 40 then 40 else employee_row.hours end;
             ot_hours := case when employee_row.hours > 40 then employee_row.hours - 40 else 0 end;
 
+-- determine transportation fee
             transport_fee :=
                     CASE
                         WHEN employee_row.TRANSPORT_CODE = 'P' THEN 7.5
@@ -108,12 +119,14 @@ BEGIN
                         WHEN employee_row.TRANSPORT_CODE = 'L' THEN 1
                         WHEN employee_row.TRANSPORT_CODE = 'N' THEN 0
                         END;
-
+ -- Formulas
             gross_pay := regular_hours * employee_row.HOURLY_RATE + ot_hours * employee_row.HOURLY_RATE * 1.5;
             taxes := gross_pay * tax_rate;
             net_pay := gross_pay - taxes - transport_fee;
             --             DBMS_OUTPUT.PUT_LINE( employee_row.EMPLOYEE_ID || ' ' || employee_row.FIRST_NAME || ' ' || 'gross: ' || gross_pay || ' net: ' || net_pay ||
 --                                  ' taxes: ' || taxes || ' transport: ' || transport_fee);
+
+ -- dynamic SQL to insert into bc_payroll
             INSERT INTO BC_PAYROLL (EMPLOYEE_ID, REG_HOURS, OVT_HOURS, GROSS_PAY, TAXES, TRANSPORT_FEE, NET_PAY)
             VALUES (employee_row.EMPLOYEE_ID, regular_hours, ot_hours, gross_pay, taxes, transport_fee, net_pay);
         end loop;
