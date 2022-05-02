@@ -1,3 +1,7 @@
+-- Kathryn Morales- Martinez
+-- Mark Chouinard
+-- Sarah Johnson
+
 -- Drop tables at beginning with Exception
 BEGIN
     BEGIN
